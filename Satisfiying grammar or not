@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <string.h>
+char input[100];
+int pos = 0;  
+int S() {
+    if (input[pos] == 'a') {
+        pos++; 
+        if (S()) { 
+            if (input[pos] == 'b') {
+                pos++; 
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    }
+    return 1;
+}
+int main() {
+    printf("Enter a string with a's followed by equal number of b's:\n");
+    scanf("%s", input);
+    if (S() && pos == strlen(input)) {
+        printf("✅ String \"%s\" is VALID as per the grammar.\n", input);
+    } else {
+        printf("❌ String \"%s\" is NOT VALID as per the grammar.\n", input);
+    }
+    return 0;
+}
