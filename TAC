@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+struct TAC {
+    char lhs[10], op[3], arg1[10], arg2[10];
+} code[30];
+int tempCount = 1;
+void newTemp(char *res) {
+    sprintf(res, "t%d", tempCount++);
+}
+void generate(char *lhs, char *arg1, char *op, char *arg2, int index) {
+    strcpy(code[index].lhs, lhs);
+    strcpy(code[index].arg1, arg1);
+    strcpy(code[index].op, op);
+    strcpy(code[index].arg2, arg2);
+}
+int main() {
+    char expr[100], outputVar[10];
+    int i, k = 0, n = 0;
+    char op[2], arg1[10], arg2[10], res[10];
+    printf("Enter expression (e.g., a = b + c * d):\n");
+    fgets(expr, sizeof(expr), stdin);
+    expr[strcspn(expr, "\n")] = '\0';  
+    i = 0;
+    while (expr[i] != '=' && expr[i] != '\0') {
+        outputVar[k++] = expr[i++];
+    }
+    outputVar[k] = '\0';
+    i++;
+    char tokens[20][10];
+    int tcount = 0, j = 0;
+    while (expr[i] != '\0') {
+        if (expr[i] != ' ') {
+            tokens[tcount][j++] = expr[i];
+        } else {
+            if (j != 0) {
+                tokens[tcount][j] = '\0';
+                tcount++;
+                j = 0;
+            }
+        }
+        i++;
+    }
+    if (j != 0) {
+        tokens[tcount][j] = '\0';
+        tcount++;
+    }
+    for (i = 0; i < tcount; i++) {
+        if (strcmp(tokens[i], "*") == 0 || strcmp(tokens[i], "/") == 0) {
+            strcpy(arg1, tokens[i-1]);
+            strcpy(op, tokens[i]);
+            strcpy(arg2, tokens[i+1]);
+            newTemp(res);
+            generate(res, arg1, op, arg2, n++);
+            strcpy(tokens[i-1], res); 
+            for (k = i; k < tcount-2; k++) strcpy(tokens[k], tokens[k+2]);
+            tcount -= 2;
+            i--;
+        }
+    }
+    for (i = 0; i < tcount; i++) {
+        if (strcmp(tokens[i], "+") == 0 || strcmp(tokens[i], "-") == 0) {
+            strcpy(arg1, tokens[i-1]);
+            strcpy(op, tokens[i]);
+            strcpy(arg2, tokens[i+1]);
+            newTemp(res);
+            generate(res, arg1, op, arg2, n++);
+            strcpy(tokens[i-1], res);
+            for (k = i; k < tcount-2; k++) strcpy(tokens[k], tokens[k+2]);
+            tcount -= 2;
+            i--;
+        }
+    }
+    generate(outputVar, tokens[0], "=", "", n++);
+    printf("\nThree Address Code:\n");
+    for (i = 0; i < n; i++) {
+        if (strcmp(code[i].op, "=") == 0)
+            printf("%s = %s\n", code[i].lhs, code[i].arg1);
+        else
+            printf("%s = %s %s %s\n", code[i].lhs, code[i].arg1, code[i].op, code[i].arg2);
+    }
+    return 0;
+}
