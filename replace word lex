@@ -1,0 +1,32 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+char find[20], replace[20];
+%}
+
+%%
+[A-Za-z]+   {
+                if(strcmp(yytext, find) == 0)   // check if matches
+                    printf("%s", replace);      // print replacement
+                else
+                    printf("%s", yytext);       // print original
+            }
+
+[ \t\n]+    { printf("%s", yytext); }   // keep spaces/newlines
+.           { printf("%s", yytext); }   // keep punctuation
+%%
+
+int main() {
+    printf("Word to replace: ");
+    scanf("%s", find);
+
+    printf("Replace with: ");
+    scanf("%s", replace);
+
+    printf("\nEnter text (Ctrl+D to end):\n");
+    yylex();
+    return 0;
+}
+
+int yywrap() { return 1; }
