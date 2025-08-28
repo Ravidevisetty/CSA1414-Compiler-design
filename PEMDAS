@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+int applyOp(int a, int b, char op) {
+    switch (op) {
+        case '+': return a + b;
+        case '-': return a - b;
+        case '*': return a * b;
+        case '/': return b != 0 ? a / b : 0;
+        case '^': return (int)pow(a, b);
+    }
+    return 0;
+}
+int precedence(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    if (op == '^') return 3;
+    return 0;
+}
+int evaluate(char* exp) {
+    int values[100]; 
+    char ops[100];   
+    int vtop = -1, optop = -1;
+    int i;
+    for (i = 0; i < strlen(exp); i++) {
+        if (exp[i] == ' ') continue;
+        if (isdigit(exp[i])) {
+            int val = 0;
+            while (i < strlen(exp) && isdigit(exp[i])) {
+                val = val * 10 + (exp[i] - '0');
+                i++;
+            }
+            i--;
+            values[++vtop] = val;
+        }
+        else if (exp[i] == '(') {
+            ops[++optop] = exp[i];
+        }
+        else if (exp[i] == ')') {
+            while (optop >= 0 && ops[optop] != '(') {
+                int val2 = values[vtop--];
+                int val1 = values[vtop--];
+                char op = ops[optop--];
+                values[++vtop] = applyOp(val1, val2, op);
+            }
+            optop--;
+        }
+        else {
+            while (optop >= 0 && precedence(ops[optop]) >= precedence(exp[i])) {
+                int val2 = values[vtop--];
+                int val1 = values[vtop--];
+                char op = ops[optop--];
+                values[++vtop] = applyOp(val1, val2, op);
+            }
+            ops[++optop] = exp[i];
+        }
+    }
+    while (optop >= 0) {
+        int val2 = values[vtop--];
+        int val1 = values[vtop--];
+        char op = ops[optop--];
+        values[++vtop] = applyOp(val1, val2, op);
+    }
+    return values[vtop];
+}
+int main() {
+    char expr[100];
+    printf("Enter an expression (supports +, -, *, /, ^, and parentheses):\n");
+    fgets(expr, sizeof(expr), stdin);
+    expr[strcspn(expr, "\n")] = '\0';
+    printf("\nExpression: %s\n", expr);
+    printf("Result (evaluated with PEMDAS): %d\n", evaluate(expr));
+    printf("\nNote: PEMDAS stands for:\n");
+    printf("P -> Parentheses\n");
+    printf("E -> Exponentiation\n");
+    printf("M -> Multiplication\n");
+    printf("D -> Division\n");
+    printf("A -> Addition\n");
+    printf("S -> Subtraction\n");
+    return 0;
+}
