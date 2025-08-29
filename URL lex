@@ -1,0 +1,20 @@
+%{
+#include <stdio.h>
+%}
+
+%%
+"https://"[a-zA-Z0-9.]+   { printf("Valid URL\n"); }
+"http://"[a-zA-Z0-9.]+    { printf("Valid URL\n"); }
+"ftp://"[a-zA-Z0-9.]+     { printf("Valid URL\n"); }
+.+                        { printf("Invalid URL\n"); }
+%%
+
+int yywrap(void) {
+    return 1;
+}
+
+int main() {
+    printf("Enter the URL: ");
+    yylex();
+    return 0;
+}
